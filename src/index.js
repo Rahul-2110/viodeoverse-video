@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const { authRoutes } = require('./routes');
 
 const app = express();
 
@@ -9,9 +10,8 @@ app.use(cors());
 app.use(bodyParser.json());
 
 
-app.get('/', (req, res) => {
-    res.send('Hello World!');
-});
 // Routes
+app.use(authRoutes)
+
 
 module.exports = app;
