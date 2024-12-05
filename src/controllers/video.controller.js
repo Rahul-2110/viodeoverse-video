@@ -20,7 +20,7 @@ const uploadVideo = async (req, res) => {
         const duration = durationValidation.duration;
 
         const videoRepo = appDataSource.getRepository(Video);
-        const video = videoRepo.create({ name: fileName, size, duration, path: filePath });
+        const video = videoRepo.create({ name: fileName, size, duration, path: filePath, user: req.user.id });
         await videoRepo.save(video);
 
         res.status(201).json({
