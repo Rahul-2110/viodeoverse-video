@@ -3,6 +3,8 @@ const { config } = require("../../config");
 const path = require('node:path');
 const fs = require('node:fs');
 const multer = require('multer');
+const ffmpeg = require("fluent-ffmpeg");
+const { error } = require("node:console");
 
 const UPLOAD_DIR = path.join(
     __dirname,
@@ -31,13 +33,33 @@ const uploadValidator = multer({
                 )
             );
         }
-        const minFileSize = config.get("video.min_size_mb") * 1024 * 1024;
-        if (file.size < minFileSize) {
-          return cb(new Error(`File is too small. Minimum size is ${minFileSize} MB.`));
-        }
         cb(null, true);
     },
 }).single('video');
 
 
-module.exports = { uploadValidator };
+function validateVideoDuration(filePath) {
+    return new Promise((resolve, reject) => {
+        ffmpeg.ffprobe(filePath, (err, metadata) => {
+            if (err) {
+                fs.unlinkSync(filePath);
+                console.log(err);
+                resolve({ error: "Error analyzing video", duration: null });
+            }
+
+            if (!metadata || !metadata.format) {
+                fs.unlinkSync(filePath);
+                resolve({ error: "Metadata is undefined or invalid", duration: null}); 
+            }
+
+            const duration = metadata.format.duration;
+            if (duration < config.get("video.min_duration_sec") || duration > config.get("video.max_duration_sec")) {
+                fs.unlinkSync(filePath);
+                reject({error: `Video duration must be between ${config.get("video.min_duration_sec")} and ${config.get("video.max_duration_sec")} seconds`, duration: null}); 
+            }
+            resolve({ duration, error: null });
+        });
+    });
+}
+
+module.exports = { uploadValidator, validateVideoDuration };
