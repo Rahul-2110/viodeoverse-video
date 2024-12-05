@@ -29,5 +29,14 @@ module.exports = new EntitySchema({
             type: 'datetime',
             default: () => 'CURRENT_TIMESTAMP',
         },
+        user: {
+            type: 'int',
+            nullable: false,
+            foreignKey: {
+                name: 'id',
+                entity: 'users',
+                onDelete: 'CASCADE',
+            }
+        }
     },
 });
