@@ -1,14 +1,21 @@
-const { User } = require("../db/models");
+
+const { User } = require("../db/models/user");
+const { UserTable } = require("../db/tables");
 
 const registerUser = async (req, res) => {
-    try{
+    try {
         const { username } = req.body;
-        const user = await User.create({ username });
-        res.status(201).json({ user });
-    }catch(error){
+        const userExists = await UserTable.findOne({ where: { username } });
+        if (userExists) {
+            return res.status(400).json({ message: 'User already exists' });
+        }
+        const user = new User(username);
+        const userDoc = await UserTable.save(user);
+        res.status(201).json({ ...userDoc });
+    } catch (error) {
         console.log(error);
         res.status(500).json({ message: error.message });
-    }
+    } 
 }
 
 module.exports = { registerUser };
