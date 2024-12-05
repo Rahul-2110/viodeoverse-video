@@ -4,7 +4,6 @@ const path = require('node:path');
 const fs = require('node:fs');
 const multer = require('multer');
 const ffmpeg = require("fluent-ffmpeg");
-const { error } = require("node:console");
 
 const UPLOAD_DIR = path.join(
     __dirname,

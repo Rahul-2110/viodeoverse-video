@@ -1,5 +1,4 @@
 const { EntitySchema } = require('typeorm');
-const { path } = require('../..');
 
 module.exports = new EntitySchema({
     name: 'Video',
