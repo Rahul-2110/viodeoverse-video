@@ -132,3 +132,4 @@ dist
 src/uploads
 
 db.sqlite
+test-db.sqlite
