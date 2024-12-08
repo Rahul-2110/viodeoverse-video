@@ -19,7 +19,6 @@ const shareVideo = async (req, res) => {
         video: videoRecord.id,
         slug,
         expire_at: expiresAt,
-        isShared: true
     });
 
     return res.status(200).json({

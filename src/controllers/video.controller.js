@@ -3,6 +3,7 @@ const { validateVideoDuration, getFileMetaData, cutVideo, mergeVideos, sendVideo
 const { In } = require("typeorm");
 const { VideoTable, PublicLinksTable } = require("../db/tables");
 const { appDataSource } = require("../db");
+const { PublicLinks } = require("../db/models");
 
 const uploadVideo = async (req, res) => {
     try {
@@ -138,7 +139,7 @@ const getSharedVideo = async (req, res, next) => {
                 .where("slug = :slug", { slug })
                 .execute()
 
-            return res.status(400).json({ error: 'Video not found' });
+            return res.status(404).json({ error: 'Video not found' });
         }
         const videoRecord = await VideoTable.findOneBy({ id: publicLinkRecord.video });
 
