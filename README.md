@@ -132,7 +132,7 @@ This table manages the sharing links for videos, enabling users to share videos 
 | uploadedAt |       | created_at       |
 | user       |<- |   |                  |
 +------------+   |   +------------------+
-```              |  |
+                 |  
 +------------+   |
 |   Users    |   |    
 +------------+   |   
