@@ -25,7 +25,7 @@ module.exports = new EntitySchema({
             type: 'text',
             nullable: false,
         },
-        uploadedAt: {
+        uploaded_at: {
             type: 'datetime',
             default: () => 'CURRENT_TIMESTAMP',
         },
