@@ -61,4 +61,85 @@ function validateVideoDuration(filePath) {
     });
 }
 
-module.exports = { uploadValidator, validateVideoDuration };
+
+function cutVideo(filePath, start, end) {
+    return new Promise((resolve, reject) => {
+        const fileName = path.basename(filePath, path.extname(filePath));
+        const trimmedFileName = `trimmed_${Math.floor(10000 + Math.random() * 90000)}_${fileName}.mp4`
+        const trimmedPath = path.join(
+            path.dirname(filePath),
+            trimmedFileName
+        );
+
+        const command = ffmpeg(filePath).setStartTime(start);
+
+        if (end) {
+            command.setDuration(end - start);
+        }
+
+        command
+            .output(trimmedPath)
+            .on('end', () => {
+                resolve({ path: trimmedPath, file_name: trimmedFileName });
+            })
+            .on('error', (error) => {
+                reject(error);
+            })
+            .run();
+    });
+}
+
+
+function mergeVideos(filePaths) {
+    const mergedFileName =  `merged_${Date.now()}.mp4`
+    return new Promise((resolve, reject) => {
+        const mergeListPath = path.join(
+            path.dirname(filePaths[0]),
+            'merge_list.txt'
+        );
+        const mergedVideoPath = path.join(
+            path.dirname(filePaths[0]),
+            mergedFileName
+        );
+
+        fs.writeFileSync(
+            mergeListPath,
+            filePaths.map((filePath) => `file '${filePath}'`).join('\n')
+        );
+
+        ffmpeg()
+            .input(mergeListPath)
+            .inputOptions(['-f concat', '-safe 0'])
+            .outputOptions(['-c copy'])
+            .output(mergedVideoPath)
+            .on('end', () => {
+                fs.unlinkSync(mergeListPath);
+                resolve({path: mergedVideoPath, file_name: mergedFileName});
+            })
+            .on('error', (error) => {
+                if (fs.existsSync(mergeListPath)) {
+                    fs.unlinkSync(mergeListPath);
+                }
+                reject(error);
+            })
+            .run();
+    });
+}
+
+
+function getFileMetaData(filePath) {
+    return new Promise((resolve, reject) => {
+        ffmpeg.ffprobe(filePath, (err, metadata) => {
+            if (err) {
+                return reject(err);
+            }
+
+            const data = metadata.format;
+            resolve(data);
+        });
+    });
+}
+
+
+
+module.exports = { uploadValidator, validateVideoDuration, cutVideo, mergeVideos, getFileMetaData};
