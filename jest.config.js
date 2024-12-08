@@ -8,4 +8,5 @@ module.exports = {
     coverageReporters: ['text', 'lcov'],
     globalSetup: './tests/setup.js',
     globalTeardown: './tests/teardown.js',
+    runner: 'jest-serial-runner'
 };

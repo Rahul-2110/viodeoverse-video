@@ -2,7 +2,8 @@ const { UserTable } = require("../db/tables");
 
 
 const authMiddleware = async (req, res, next) => {
-    let token = req.headers['authorization'];
+    let bearer = req.headers['authorization'];
+    let token = bearer.split(' ')[1];
     if (!token) {
         return res.status(403).json({ message: 'Unauthorized' });
     }

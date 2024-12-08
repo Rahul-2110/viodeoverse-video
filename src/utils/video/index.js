@@ -4,6 +4,7 @@ const path = require('node:path');
 const fs = require('node:fs');
 const multer = require('multer');
 const ffmpeg = require("fluent-ffmpeg");
+const APIError = require("../APIError");
 
 const UPLOAD_DIR = path.join(
     __dirname,
@@ -166,7 +167,6 @@ function sendVideo(filePath, req, res, disposition) {
         fs.createReadStream(filePath).pipe(res);
     }
 }
-
 
 
 function getFileMetaData(filePath) {
