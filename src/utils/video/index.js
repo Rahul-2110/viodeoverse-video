@@ -126,6 +126,48 @@ function mergeVideos(filePaths) {
     });
 }
 
+function sendVideo(filePath, req, res, disposition) {
+    const stat = fs.statSync(filePath);
+    const fileSize = stat.size;
+    const range = req.headers.range;
+
+    res.setHeader('Content-Type', 'video/mp4');
+    res.setHeader(
+        'Content-Disposition',
+        `${disposition}; filename="${path.basename(filePath)}"`
+    );
+
+    if (range) {
+
+        const parts = range.replace(/bytes=/, '').split('-');
+        const start = parseInt(parts[0], 10);
+        const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+
+        if (start >= fileSize) {
+            res.status(416).send('Requested range cannot be satisfied');
+            return;
+        }
+
+        const chunkSize = end - start + 1;
+        const fileStream = fs.createReadStream(filePath, { start, end });
+
+        res.writeHead(206, {
+            'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+            'Accept-Ranges': 'bytes',
+            'Content-Length': chunkSize,
+        });
+
+        fileStream.pipe(res);
+    } else {
+        res.writeHead(200, {
+            'Content-Length': fileSize,
+        });
+
+        fs.createReadStream(filePath).pipe(res);
+    }
+}
+
+
 
 function getFileMetaData(filePath) {
     return new Promise((resolve, reject) => {
@@ -142,4 +184,4 @@ function getFileMetaData(filePath) {
 
 
 
-module.exports = { uploadValidator, validateVideoDuration, cutVideo, mergeVideos, getFileMetaData};
+module.exports = { uploadValidator, validateVideoDuration, cutVideo, mergeVideos, sendVideo, getFileMetaData};

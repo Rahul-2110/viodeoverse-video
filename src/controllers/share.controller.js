@@ -27,7 +27,7 @@ const shareVideo = async (req, res) => {
 
     return res.status(200).json({
         message: 'Video shared successfully',
-        shareUrl: `${config.get('base_url')}/public/video/${slug}`
+        shareUrl: `${config.get('base_url')}/${slug}`
     });
 }
 
