@@ -1,7 +1,7 @@
 const multer = require("multer");
 const { appDataSource } = require("../db");
-const { Video } = require("../db/models");
-const { validateVideoDuration, getFileMetaData, cutVideo, mergeVideos} = require("../utils/video");
+const { Video, PublicLinks } = require("../db/models");
+const { validateVideoDuration, getFileMetaData, cutVideo, mergeVideos, sendVideo } = require("../utils/video");
 const { In } = require("typeorm");
 
 const uploadVideo = async (req, res) => {
@@ -56,7 +56,7 @@ const trimVideo = async (req, res, next) => {
         if (start >= video.duration) {
             return res.status(400).json({ error: 'Invalid start time. It must be within the video duration' });
         }
-        else if (end > video.duration) { 
+        else if (end > video.duration) {
             return res.status(400).json({ error: 'Invalid end time. It must be greater than start time and within the video duration' });
         }
 
@@ -87,7 +87,7 @@ const mergeVideo = async (req, res, next) => {
     try {
         const { videos } = req.body;
 
-       const videoTable = appDataSource.getRepository(Video);
+        const videoTable = appDataSource.getRepository(Video);
 
         const videoRecords = await videoTable.find({
             where: {
@@ -124,4 +124,36 @@ const mergeVideo = async (req, res, next) => {
     }
 };
 
-module.exports = { uploadVideo, trimVideo, mergeVideo };
+
+const getSharedVideo = async (req, res, next) => {
+    try {
+        const { slug } = req.params;
+        const disposition = req.headers['content-disposition'] || 'inline';
+
+
+        const publicLinksTable = appDataSource.getRepository(PublicLinks);
+        const videoTable = appDataSource.getRepository(Video);
+        const publicLinkRecord = await publicLinksTable.findOneBy({ slug });
+        if (!publicLinkRecord) {
+            return res.status(400).json({ error: 'Video not found' });
+        }
+        if (publicLinkRecord.expire_at < new Date()) {
+            await appDataSource.createQueryBuilder()
+                .delete()
+                .from(PublicLinks)
+                .where("slug = :slug", { slug })
+                .execute()
+
+            return res.status(400).json({ error: 'Video not found' });
+        }
+        const videoRecord = await videoTable.findOneBy({ id: publicLinkRecord.video });
+
+
+        sendVideo(videoRecord.path, req, res, disposition);
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+module.exports = { uploadVideo, trimVideo, mergeVideo, getSharedVideo };

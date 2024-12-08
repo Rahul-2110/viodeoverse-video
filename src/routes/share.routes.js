@@ -9,5 +9,4 @@ const router = Router();
 
 router.post('/share', [authMiddleware, validateRequest(shareVideoSchema)], shareVideo);
 
-
 module.exports = router;
