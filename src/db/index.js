@@ -1,13 +1,12 @@
 const { DataSource } = require('typeorm');
 const { config } = require('../config');
-const User = require('./models/user');
-const Video  = require('./models/video');
+const { PublicLinks, Video, User } = require('./models');
 
 const appDataSource = new DataSource({
     type: 'sqlite',
     database: config.get('db.path'),
     synchronize: true,
-    entities: [User, Video],
+    entities: [User, Video, PublicLinks],
 });
 
 async function initDb() {

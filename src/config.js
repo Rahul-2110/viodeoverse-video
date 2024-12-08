@@ -21,6 +21,12 @@ const config = convict({
         default: 3000,
         env: "PORT",
     },
+    base_url:{
+        doc: "Service base url",
+        format: String,
+        default: 'localhost:3000',
+        env: "BASE_URL",
+    },
     video:{
         max_size_mb: {
             doc: "Maximum size of video in MB",

@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const { authRoutes, videoRoutes } = require('./routes');
+const { authRoutes, videoRoutes, shareRoutes } = require('./routes');
 
 const app = express();
 
@@ -13,6 +13,7 @@ app.use(bodyParser.json());
 // Routes
 app.use(authRoutes)
 app.use(videoRoutes)
+app.use(shareRoutes)
 
 
 module.exports = app;
