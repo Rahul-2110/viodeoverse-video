@@ -1,15 +1,12 @@
 const { config } = require("../config");
-const { appDataSource } = require("../db");
-const { Video, PublicLinks } = require("../db/models");
 const { generateSlug } = require("../db/models/public_links");
+const { PublicLinksTable, VideoTable } = require("../db/tables");
 
 
 const shareVideo = async (req, res) => {
     const { video, ttl = 1440 } = req.body;
-    const videoTable = appDataSource.getRepository(Video);
-    const videoRecord = await videoTable.findOneBy({ id: video, user: req.user.id });
 
-    const publicLinksTable = appDataSource.getRepository(PublicLinks);
+    const videoRecord = await VideoTable.findOneBy({ id: video, user: req.user.id });
 
     if (!videoRecord || videoRecord.user !== req.user.id) {
         return res.status(400).json({ error: 'Video not found' });
@@ -18,7 +15,7 @@ const shareVideo = async (req, res) => {
     const expiresAt = new Date(Date.now() + ttl * 60 * 1000);
     const slug = generateSlug();
 
-    const sharedVideo = await publicLinksTable.save({
+    const sharedVideo = await PublicLinksTable.save({
         video: videoRecord.id,
         slug,
         expire_at: expiresAt,

@@ -1,6 +1,5 @@
 const app = require("../src");
 const { config } = require("../src/config");
-const { initDb } = require("../src/db");
 
 
 const getServerInstance = async () => {

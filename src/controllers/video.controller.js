@@ -1,8 +1,8 @@
 const multer = require("multer");
-const { appDataSource } = require("../db");
-const { Video, PublicLinks } = require("../db/models");
 const { validateVideoDuration, getFileMetaData, cutVideo, mergeVideos, sendVideo } = require("../utils/video");
 const { In } = require("typeorm");
+const { VideoTable, PublicLinksTable } = require("../db/tables");
+const { appDataSource } = require("../db");
 
 const uploadVideo = async (req, res) => {
     try {
@@ -20,9 +20,8 @@ const uploadVideo = async (req, res) => {
 
         const duration = durationValidation.duration;
 
-        const videoTable = appDataSource.getRepository(Video);
-        const video = videoTable.create({ name: fileName, size, duration, path: filePath, user: req.user.id });
-        await videoTable.save(video);
+        const video = VideoTable.create({ name: fileName, size, duration, path: filePath, user: req.user.id });
+        await VideoTable.save(video);
 
         res.status(201).json({
             message: 'Video uploaded successfully',
@@ -46,11 +45,10 @@ const trimVideo = async (req, res, next) => {
         const { start = 0, end } = req.body;
         const { id } = req.params;
 
-        const videoTable = appDataSource.getRepository(Video);
-        const video = await videoTable.findOneBy({ id: id, user: req.user.id });
+        const video = await VideoTable.findOneBy({ id: id, user: req.user.id });
 
         if (!video || video.user !== req.user.id) {
-            return res.status(400).json({ error: 'Video not found' });
+            return res.status(404).json({ error: 'Video not found' });
         }
 
         if (start >= video.duration) {
@@ -63,7 +61,7 @@ const trimVideo = async (req, res, next) => {
         const trimmedVideoMeta = await cutVideo(video.path, start, end);
         const { duration, size } = await getFileMetaData(trimmedVideoMeta.path);
 
-        const trimmedVideo = videoTable.create({
+        const trimmedVideo = VideoTable.create({
             name: trimmedVideoMeta.file_name,
             path: trimmedVideoMeta.path,
             size: size,
@@ -71,7 +69,7 @@ const trimVideo = async (req, res, next) => {
             user: req.user.id,
         });
 
-        await videoTable.save(trimmedVideo);
+        await VideoTable.save(trimmedVideo);
 
         res.status(200).json({
             message: 'Video trimmed successfully',
@@ -87,9 +85,7 @@ const mergeVideo = async (req, res, next) => {
     try {
         const { videos } = req.body;
 
-        const videoTable = appDataSource.getRepository(Video);
-
-        const videoRecords = await videoTable.find({
+        const videoRecords = await VideoTable.find({
             where: {
                 id: In(videos),
                 user: req.user.id
@@ -105,7 +101,7 @@ const mergeVideo = async (req, res, next) => {
 
         const { duration, size } = await getFileMetaData(mergedVideoMeta.path);
 
-        const mergedVideo = videoTable.create({
+        const mergedVideo = VideoTable.create({
             name: mergedVideoMeta.file_name,
             path: mergedVideoMeta.path,
             size: size,
@@ -113,7 +109,7 @@ const mergeVideo = async (req, res, next) => {
             user: req.user.id,
         });
 
-        await videoTable.save(mergedVideo);
+        await VideoTable.save(mergedVideo);
 
         res.status(200).json({
             message: 'Videos merged successfully.',
@@ -130,10 +126,8 @@ const getSharedVideo = async (req, res, next) => {
         const { slug } = req.params;
         const disposition = req.headers['content-disposition'] || 'inline';
 
+        const publicLinkRecord = await PublicLinksTable.findOneBy({ slug });
 
-        const publicLinksTable = appDataSource.getRepository(PublicLinks);
-        const videoTable = appDataSource.getRepository(Video);
-        const publicLinkRecord = await publicLinksTable.findOneBy({ slug });
         if (!publicLinkRecord) {
             return res.status(400).json({ error: 'Video not found' });
         }
@@ -146,7 +140,7 @@ const getSharedVideo = async (req, res, next) => {
 
             return res.status(400).json({ error: 'Video not found' });
         }
-        const videoRecord = await videoTable.findOneBy({ id: publicLinkRecord.video });
+        const videoRecord = await VideoTable.findOneBy({ id: publicLinkRecord.video });
 
 
         sendVideo(videoRecord.path, req, res, disposition);
