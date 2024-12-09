@@ -141,15 +141,6 @@ This table manages the sharing links for videos, enabling users to share videos 
 | token      |      
 +------------+   
 
-
----
-
-## Postman Collection
-
-[<img src="https://run.pstmn.io/button.svg" alt="Run In Postman" style="width: 128px; height: 32px;">](https://red-astronaut-537910.postman.co/workspace/videoverse-video~a36a5b78-41fc-44dd-8aaf-86e31f86c511/collection/18671452-27c712cf-f2fd-4b2d-a268-a8d470a9e91b?action=share&creator=18671452)
-
-Note: Ensure to register the user and add the Authorization API token to the collection before testing the APIs.
-
 ---
 
 ## API Documentation
@@ -163,6 +154,12 @@ All endpoints (except `GET /:slug` , `POST /register`) require the following hea
   "Authorization": "Bearer {token}"
 }
 ```
+
+## Postman Collection
+
+[<img src="https://run.pstmn.io/button.svg" alt="Run In Postman" style="width: 128px; height: 32px;">](https://red-astronaut-537910.postman.co/workspace/videoverse-video~a36a5b78-41fc-44dd-8aaf-86e31f86c511/collection/18671452-27c712cf-f2fd-4b2d-a268-a8d470a9e91b?action=share&creator=18671452)
+
+Note: Ensure to register the user and add the Authorization API token to the collection before testing the APIs.
 
 Note: The auth token is kept as a static value for each user
 
