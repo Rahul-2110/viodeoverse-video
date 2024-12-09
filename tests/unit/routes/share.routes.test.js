@@ -19,7 +19,7 @@ describe('Video Routes', () => {
 
     it('Share Video', async () => {
 
-        
+        // Upload a video
         let filePath = path.join(__dirname, 'videos/valid_video.mp4');
 
         let response = await request(app)
@@ -30,6 +30,7 @@ describe('Video Routes', () => {
         expect(response.status).toBe(201);
         this.video = response.body.video;
 
+        // Share the video
         response = await request(app)
             .post('/share')
             .set('Authorization', 'Bearer ' + users[0].token)
@@ -42,6 +43,7 @@ describe('Video Routes', () => {
         expect(response.body.shareUrl).toBeDefined();
         this.sharedVideo = response.body.shareUrl;
 
+        // Share the video again, User without access to the video
         response = await request(app)
             .post('/share')
             .set('Authorization', 'Bearer ' + users[1].token)

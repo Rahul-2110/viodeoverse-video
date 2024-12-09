@@ -22,6 +22,7 @@ describe('Auth Routes', () => {
 
     it('Register User', async () => {
 
+        // Register a new user
         let response = await request(app)
             .post('/register')
             .send({
@@ -31,6 +32,7 @@ describe('Auth Routes', () => {
         expect(response.body.username).toBe('testUser');
         expect(response.body.token).toBeDefined();
 
+        // Register a duplicate user
         response = await request(app)
             .post('/register')
             .send({

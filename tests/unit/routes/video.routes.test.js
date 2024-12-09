@@ -18,7 +18,7 @@ describe('Video Routes', () => {
 
     it('Upload Video', async () => {
 
-        
+        // Upload Video
         let filePath = path.join(__dirname, 'videos/valid_video.mp4');
 
         let response = await request(app)
@@ -30,6 +30,8 @@ describe('Video Routes', () => {
 
         this.video = response.body.video;
 
+
+        // Upload Video with invalid file
         filePath = path.join(__dirname, 'auth.routes.test.js');
 
         response = await request(app)
@@ -44,6 +46,7 @@ describe('Video Routes', () => {
 
     it('Trim Video', async () => {
 
+        // Trim Video
         let response = await request(app)
             .post(`/trim/${this.video.id}`)
             .set('Authorization', 'Bearer ' + users[0].token)
@@ -55,6 +58,8 @@ describe('Video Routes', () => {
         expect(response.status).toBe(200);
         this.video2 = response.body.video;
 
+
+        // Trim Video with invalid id
         response = await request(app)
             .post('/trim/100')
             .set('Authorization', 'Bearer ' + users[0].token)
@@ -66,6 +71,7 @@ describe('Video Routes', () => {
         expect(response.status).toBe(404);
 
 
+        // Trim Video, User without access to the video
         response = await request(app)
             .post(`/trim/${this.video.id}`)
             .set('Authorization', 'Bearer ' + users[1].token)
@@ -77,7 +83,7 @@ describe('Video Routes', () => {
         expect(response.status).toBe(404);
 
 
-
+        // Trim Video, Invalid start time
         response = await request(app)
             .post(`/trim/${this.video.id}`)
             .set('Authorization', 'Bearer ' + users[0].token)
@@ -88,7 +94,7 @@ describe('Video Routes', () => {
 
         expect(response.status).toBe(400);
 
-
+        // Trim Video, Invalid end time
         response = await request(app)
             .post(`/trim/${this.video.id}`)
             .set('Authorization', 'Bearer ' + users[0].token)
@@ -105,6 +111,7 @@ describe('Video Routes', () => {
 
     it('Merge Video', async () => {
 
+        // Merge Videos
         let response = await request(app)
             .post(`/merge`)
             .set('Authorization', 'Bearer ' + users[0].token)
@@ -114,6 +121,8 @@ describe('Video Routes', () => {
             
         expect(response.status).toBe(200);
 
+
+        // Merge Videos with invalid id
         response = await request(app)
             .post(`/merge`)
             .set('Authorization', 'Bearer ' + users[1].token)
